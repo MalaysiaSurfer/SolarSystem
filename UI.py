@@ -1270,8 +1270,6 @@ class App:
             data.constants["dt"] = 1
             data.constants["update_speed"] = 1
             blackhole = 0
-        for body in data.bodies:
-            print(body.info)
 
     def reset_switcher(self, event=None) -> None:
         global reset_switch
