@@ -2,9 +2,8 @@
 
 A realistic and interactive Solar System simulator built with Python and Tkinter. This project features multiple simulation modes, real-time physics, and educational tools for exploring celestial mechanics.
 
-![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
+![Python](https://img.shields.io/badge/Python-3.13.5%2B-blue)
 ![Tkinter](https://img.shields.io/badge/GUI-Tkinter-green)
-![Physics](https://img.shields.io/badge/Physics-Newtonian-orange)
 
 ## 🌟 Features
 
@@ -58,11 +57,13 @@ python Run.py
 - **WASD**: Navigate
 - **Arrow Right/Left**: Zoom in/out
 - **Arrow Up/Down**: Increase/decrease simulation speed
+- **R**: Reset system
 
 ### Mass changes
 1. Select a planet from the dropdown menu in the top-right
 2. Use the mass multiplier slider to adjust the planet's mass (0.1x to 10x)
 3. Observe how orbital dynamics change in real-time
+4. Button-2/Button-3 to hide slider
 
 ### Visual Buttons
 - **Toggle Trails**: Show/hide planetary orbit trails
@@ -78,5 +79,5 @@ python Run.py
 - **Multiple View Modes**: Switch between simplified and realistic scales
 - **Planet Information**: Pause (space button) and press on the planet to see information about it
 
-### Project was made by [me](https://github.com/limping23) and [Artem](https://github.com/MalaysiaKiller)
+### Project was made by [Matvey](https://github.com/limping23) and [me](https://github.com/MalaysiaSurfer)
 P.S. vielen Dank an Sergey für eine gute Idee und seine Hilfe❤️
