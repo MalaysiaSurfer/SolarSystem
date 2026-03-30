@@ -7,21 +7,6 @@ import os
 import sys
 
 
-def is_between(p1: data.Point, p2: data.Point, p3: data.Point, eps=1e-9) -> bool:
-    x1 = p1.x
-    y1 = p1.y
-    x2 = p2.x
-    y2 = p2.y
-    x3 = p3.x
-    y3 = p3.y
-    collinear = abs((x3 - x1) * (y2 - y1) - (y3 - y1) * (x2 - x1)) < eps
-    if not collinear:
-        return False
-    within_x = min(x1, x2) - eps <= x3 <= max(x1, x2) + eps
-    within_y = min(y1, y2) - eps <= y3 <= max(y1, y2) + eps
-    return within_x and within_y
-
-
 def set_circular_velocity(body: CelestialBody, center: CelestialBody) -> None:
     dx = body.position.x - center.position.x
     dy = body.position.y - center.position.y
@@ -47,17 +32,49 @@ def remove_system_momentum(bodies: list[CelestialBody]) -> None:
         body.Orbital_speed.y -= vy_cm
 
 
-def distance(p1: data.Point, p2: data.Point) -> float:  # Distance between 2 points
+# Distance between 2 points
+def distance(p1: data.Point, p2: data.Point) -> float:
     return math.hypot(p1.x - p2.x, p1.y - p2.y)
 
 
+def segment_intersects_circle(p1: data.Point, p2: data.Point, center: data.Point, radius: float) -> bool:
+    dx = p2.x - p1.x
+    dy = p2.y - p1.y
+
+    fx = p1.x - center.x
+    fy = p1.y - center.y
+
+    a = dx*dx + dy*dy
+    b = 2 * (fx*dx + fy*dy)
+    c = fx*fx + fy*fy - radius*radius
+
+    discriminant = b*b - 4*a*c
+    if discriminant < 0:
+        return False
+
+    disc_sqrt = math.sqrt(discriminant)
+    t1 = (-b - disc_sqrt) / (2 * a)
+    t2 = (-b + disc_sqrt) / (2 * a)
+
+    return (0 <= t1 <= 1) or (0 <= t2 <= 1)
+
+
+def can_leave(now_pos: data.Point, next_pos: data.Point, bh_pos: data.Point, schwartz: float) -> bool:
+    if distance(now_pos, bh_pos) <= schwartz:
+        return False
+    return not segment_intersects_circle(now_pos, next_pos, bh_pos, schwartz)
+
+
+
+# Law of Universal Gravitation
 def law_ug(
     m1: float, m2: float, r: float, softening: float = 0
-) -> float:  # Law of Universal Gravitation
+) -> float:
     return data.constants["G"] * m1 * m2 / (r**2 + softening)
 
 
-def angle(position: data.Vector) -> float:  # Angle of vector relative to x
+# Angle of vector relative to x
+def angle(position: data.Vector) -> float:
     delta_x = position.x2 - position.x1
     delta_y = position.y2 - position.y1
     return math.atan2(delta_y, delta_x)
@@ -112,12 +129,13 @@ def update_position(
     )  # True acceleration in the Oxy axis
     movement = body.Orbital_speed * dt + acceleration * dt**2 / 2
     body.next_pos = body.position + movement  # Setting new pos for planet
-    if blackhole and (
-        distance(body.position, data.BlackHole.position) < data.BlackHole.radius
-        or is_between(body.position, body.next_pos, data.BlackHole.position)
-    ):
-        body.color = "black"
-        body.position = data.BlackHole.position
+    if blackhole:
+        schwartz_radius = 2 * data.constants["G"] * data.BlackHole.mass / data.constants["c"] ** 2
+        absorption_radius = max(schwartz_radius, data.BlackHole.radius * 2)
+        if not can_leave(body.position, body.next_pos, data.BlackHole.position, absorption_radius):
+            body.color = "#000000"
+            body.position = data.BlackHole.position
+            body.next_pos = data.BlackHole.position
     body.Orbital_speed += acceleration * dt  # Setting new speed for planet
 
     # Optimized trail creation
